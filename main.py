@@ -109,7 +109,7 @@ async def check_subscription(callback: CallbackQuery):
             cursor.execute("SELECT verified_referrals, is_member FROM users WHERE user_id = ?", (referer_id,))
             data = cursor.fetchone()
             verified_referrals = data[0]
-            print(data[1])
+        
             if verified_referrals >= 3:
                 secret_token = secrets.token_urlsafe(8)
                 secret_link = f"{SECRET_CHANNEL_BASE_LINK}?start={secret_token}"
@@ -130,12 +130,25 @@ async def check_subscription(callback: CallbackQuery):
                 )
 
         keyboard = ReplyKeyboardMarkup(
-            keyboard=[[KeyboardButton(text="📊 Mening hisobim")]],
+            keyboard=[
+                [KeyboardButton(text="📊 Mening hisobim")], 
+                [KeyboardButton(text="🔗Referal Link")]
+                ],
             resize_keyboard=True
         )
+
         cursor.execute("SELECT referral_link FROM users WHERE user_id = ?", (user_id,))
-        await callback.message.answer(f"🎉 Siz kanalga muvaffaqiyatli qo‘shildingiz!\n🔗 Bu link orqali 3 ta do’stingizni qo’shing, va bepul marafonga ega bo’ling!!! \n{cursor.fetchone()[0]}", reply_markup=keyboard)
-        
+        referral_link = cursor.fetchone()[0]
+
+        await callback.message.answer(
+            f"🎉 Siz kanalga muvaffaqiyatli qo‘shildingiz!\n\n"
+            f"🔗 <b>Bu sizning referal linkingiz:</b>\n\n"
+            f"🟦 <code>{referral_link}</code>\n\n"
+            f"👥 3 ta do‘stingizni taklif qilib, bepul marafonga ega bo‘ling!",
+            parse_mode="HTML",
+            reply_markup=keyboard
+        )
+
 
         await callback.answer()
     else:
@@ -154,6 +167,24 @@ async def my_account(message: types.Message):
     
     response_text = f"🎯 Your Points: {verified_referrals}\n💬 Your ID: {user_id}\n👥 Friends Invited: {referral_count} people\n📱 Account Number: +{phone}"
     await message.answer(response_text)
+
+
+# ✅ Mening Referal link hisobim
+@dp.message(F.text == "🔗Referal Link")
+async def my_account(message: types.Message):
+    user_id = message.from_user.id
+    user_name = message.from_user.full_name
+    cursor.execute("SELECT referral_link FROM users WHERE user_id = ?", (user_id,))
+    referral_link = cursor.fetchone()[0]
+    
+    await message.answer(
+        f"👤 <b>{user_name}</b>, bu sizning referal linkingiz: \n\n"
+        f"🔗 <code>{referral_link}</code>", 
+        parse_mode="HTML"
+    )
+
+
+
 
 async def main():
     await dp.start_polling(bot)
