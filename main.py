@@ -137,7 +137,6 @@ async def check_subscription(callback: CallbackQuery):
             keyboard=[[KeyboardButton(text="📊 Mening hisobim")]],
             resize_keyboard=True
         )
-        await callback.message.answer("✅ Endi hisobingizni ko‘rishingiz mumkin!", reply_markup=keyboard)
         await callback.answer()
     else:
         await callback.answer("❌ Siz hali kanalga a'zo bo‘lmadingiz!", show_alert=True)
