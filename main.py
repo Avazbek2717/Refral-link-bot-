@@ -110,7 +110,7 @@ async def check_subscription(callback: CallbackQuery):
             data = cursor.fetchone()
             verified_referrals = data[0]
             print(data[1])
-            if verified_referrals >= 3:
+            if verified_referrals >= 1:
                 secret_token = secrets.token_urlsafe(8)
                 secret_link = f"{SECRET_CHANNEL_BASE_LINK}?start={secret_token}"
                 cursor.execute("UPDATE users SET secret_token = ? WHERE user_id = ?", (secret_token, referer_id))
@@ -129,14 +129,14 @@ async def check_subscription(callback: CallbackQuery):
                     parse_mode="HTML"
                 )
 
-        
-        cursor.execute("SELECT referral_link FROM users WHERE user_id = ?", (user_id,))
-        await callback.message.answer(f"🎉 Siz kanalga muvaffaqiyatli qo‘shildingiz!\n🔗 Bu link orqali 3 ta do’stingizni qo’shing, va bepul marafonga ega bo’ling!!! \n{cursor.fetchone()[0]}")
-        
         keyboard = ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text="📊 Mening hisobim")]],
             resize_keyboard=True
         )
+        cursor.execute("SELECT referral_link FROM users WHERE user_id = ?", (user_id,))
+        await callback.message.answer(f"🎉 Siz kanalga muvaffaqiyatli qo‘shildingiz!\n🔗 Bu link orqali 3 ta do’stingizni qo’shing, va bepul marafonga ega bo’ling!!! \n{cursor.fetchone()[0]}", reply_markup=keyboard)
+        
+
         await callback.answer()
     else:
         await callback.answer("❌ Siz hali kanalga a'zo bo‘lmadingiz!", show_alert=True)
