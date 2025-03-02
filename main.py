@@ -33,7 +33,8 @@ cursor.execute('''
         verified_referrals INTEGER DEFAULT 0,
         referral_link TEXT,
         secret_token TEXT UNIQUE,
-        status TEXT DEFAULT 'pending'
+        status TEXT DEFAULT 'pending',
+        is_member BOOLEAN DEFAULT FALSE
     )
 ''')
 conn.commit()
@@ -89,34 +90,71 @@ async def get_contact(message: types.Message):
 @dp.callback_query(F.data == "check_subscription")
 async def check_subscription(callback: CallbackQuery):
     user_id = callback.from_user.id
-    if await is_member(user_id):
-        cursor.execute("SELECT referer_id, verified_referrals FROM users WHERE user_id = ?", (user_id,))
-        user_data = cursor.fetchone()
-        referer_id = user_data[0]
 
-        if referer_id:
+    if await is_member(user_id):
+
+        cursor.execute("SELECT referer_id, verified_referrals , is_member FROM users WHERE user_id = ?", (user_id,))
+        user_data = cursor.fetchone()
+
+        referer_id = user_data[0]
+        is_member_db = user_data[2]
+
+        if referer_id and not is_member_db:
             cursor.execute("UPDATE users SET verified_referrals = verified_referrals + 1 WHERE user_id = ?", (referer_id,))
             conn.commit()
 
-            cursor.execute("SELECT verified_referrals FROM users WHERE user_id = ?", (referer_id,))
-            verified_referrals = cursor.fetchone()[0]
-            if verified_referrals >= 3:
+            cursor.execute("UPDATE users SET is_member = TRUE WHERE user_id = ?", (user_id,))
+            conn.commit()
+
+            cursor.execute("SELECT verified_referrals, is_member FROM users WHERE user_id = ?", (referer_id,))
+            data = cursor.fetchone()
+            verified_referrals = data[0]
+            print(data[1])
+            if verified_referrals >= 1:
                 secret_token = secrets.token_urlsafe(8)
                 secret_link = f"{SECRET_CHANNEL_BASE_LINK}?start={secret_token}"
                 cursor.execute("UPDATE users SET secret_token = ? WHERE user_id = ?", (secret_token, referer_id))
                 conn.commit()
                 
                 keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text="🔐 Maxfiy kanalga kirish", url=secret_link)]
+                    [InlineKeyboardButton(text="🔐 🔥 Maxfiy kanalga kirish 🔥", url=secret_link)]
                 ])
                 
-                await bot.send_message(referer_id, "🎉 Siz 3 ta do‘stingizni taklif qildingiz!", reply_markup=keyboard)
+                await bot.send_message(
+                    referer_id, 
+                    f"🎉 <b>Tabriklaymiz!</b> 🎉\n\n"
+                    f"✅ Siz <b> {verified_referrals} ta do‘stingizni</b> taklif qildingiz!\n"
+                    f"🔓 Endi <b>maxfiy kanalga</b> kirishingiz mumkin!", 
+                    reply_markup=keyboard, 
+                    parse_mode="HTML"
+                )
+
         
         cursor.execute("SELECT referral_link FROM users WHERE user_id = ?", (user_id,))
         await callback.message.answer(f"🎉 Siz kanalga muvaffaqiyatli qo‘shildingiz!\n🔗 Bu link orqali 3 ta do’stingizni qo’shing , va marafonga bepul ega bo’ling {cursor.fetchone()[0]}")
+        
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="📊 Mening hisobim")]],
+            resize_keyboard=True
+        )
+        await callback.message.answer("✅ Endi hisobingizni ko‘rishingiz mumkin!", reply_markup=keyboard)
         await callback.answer()
     else:
         await callback.answer("❌ Siz hali kanalga a'zo bo‘lmadingiz!", show_alert=True)
+
+# ✅ Mening hisobim tugmasi
+@dp.message(F.text == "📊 Mening hisobim")
+async def my_account(message: types.Message):
+    user_id = message.from_user.id
+    cursor.execute("SELECT referral_count, verified_referrals, phone FROM users WHERE user_id = ?", (user_id,))
+    user_data = cursor.fetchone()
+    
+    referral_count = user_data[0] if user_data else 0
+    verified_referrals = user_data[1] if user_data else 0
+    phone = user_data[2] if user_data else "none"
+    
+    response_text = f"🎯 Your Points: {verified_referrals}\n💬 Your ID: {user_id}\n👥 Friends Invited: {referral_count} people\n📱 Account Number: +{phone}"
+    await message.answer(response_text)
 
 async def main():
     await dp.start_polling(bot)
@@ -126,8 +164,3 @@ if __name__ == "__main__":
         asyncio.run(main())
     finally:
         conn.close()
-
-# TOKEN = "7772712876:AAHxf8uiRYTNenc4CSfumxmQbL9efsqd1U8"
-# CHANNEL_ID = -1002392086684  # Kanal ID sini shu yerga qo'ying
-#avazbektoshtonov077
-#avazbek2717
