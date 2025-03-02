@@ -110,7 +110,7 @@ async def check_subscription(callback: CallbackQuery):
             data = cursor.fetchone()
             verified_referrals = data[0]
             print(data[1])
-            if verified_referrals >= 1:
+            if verified_referrals >= 3:
                 secret_token = secrets.token_urlsafe(8)
                 secret_link = f"{SECRET_CHANNEL_BASE_LINK}?start={secret_token}"
                 cursor.execute("UPDATE users SET secret_token = ? WHERE user_id = ?", (secret_token, referer_id))
