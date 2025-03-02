@@ -110,7 +110,7 @@ async def check_subscription(callback: CallbackQuery):
                     [InlineKeyboardButton(text="🔐 Maxfiy kanalga kirish", url=secret_link)]
                 ])
                 
-                await bot.send_message(referer_id, "🎉 Siz 5 ta do‘stingizni taklif qildingiz!", reply_markup=keyboard)
+                await bot.send_message(referer_id, "🎉 Siz 3 ta do‘stingizni taklif qildingiz!", reply_markup=keyboard)
         
         cursor.execute("SELECT referral_link FROM users WHERE user_id = ?", (user_id,))
         await callback.message.answer(f"🎉 Siz kanalga muvaffaqiyatli qo‘shildingiz!\n🔗 Referal linkingiz: {cursor.fetchone()[0]}")
