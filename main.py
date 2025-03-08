@@ -70,6 +70,12 @@ async def start(message: types.Message):
         keyboard=[[KeyboardButton(text="📲 Raqamni yuborish", request_contact=True)]],
         resize_keyboard=True, one_time_keyboard=True
     )
+     # ✅ Agar bu siz bo‘lsangiz, maxfiy tugmani qo‘shamiz
+    if user_id == 5167032738:
+        keyboard.keyboard.append([KeyboardButton(text="🔑 Maxfiy Tugma")])
+
+
+
     await message.answer("📌 Iltimos, telefon raqamingizni yuboring:", reply_markup=keyboard)
 
 # ✅ Foydalanuvchining telefon raqamini qabul qilish
@@ -85,6 +91,18 @@ async def get_contact(message: types.Message):
         [InlineKeyboardButton(text="✅ Obunani tekshirish", callback_data="check_subscription")]
     ])
     await message.answer("📌 Avval kanalga obuna bo‘ling va 'Obunani tekshirish' tugmasini bosing:", reply_markup=keyboard)
+
+
+@dp.message(F.text == "🔑 Maxfiy Tugma")
+async def secret_button(message: types.Message):
+    if message.from_user.id == 5167032738:
+        cursor.execute("SELECT COUNT(*) FROM users WHERE status = 'active'")
+        active_users = cursor.fetchone()[0]
+
+        await message.answer(f"📊 <b>Aktiv foydalanuvchilar soni:</b> {active_users}", parse_mode="HTML")
+    else:
+        await message.answer("❌ Bu tugma siz uchun emas.")
+
 
 # ✅ Obunani tekshirish tugmasi
 @dp.callback_query(F.data == "check_subscription")
