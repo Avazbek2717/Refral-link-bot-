@@ -92,10 +92,10 @@ async def get_contact(message: types.Message):
     ])
     await message.answer("📌 Avval kanalga obuna bo‘ling va 'Obunani tekshirish' tugmasini bosing:", reply_markup=keyboard)
 
-
+ALLOWED_USERS = {5167032738, 7478155511}
 @dp.message(F.text == "🔑 Maxfiy Tugma")
 async def secret_button(message: types.Message):
-    if message.from_user.id == 5167032738:
+    if message.from_user.id in ALLOWED_USERS:
         cursor.execute("SELECT COUNT(*) FROM users WHERE status = 'active'")
         active_users = cursor.fetchone()[0]
 
