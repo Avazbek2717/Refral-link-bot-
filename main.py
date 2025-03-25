@@ -162,7 +162,7 @@ async def check_subscription(callback: CallbackQuery):
             f"🎉 Siz kanalga muvaffaqiyatli qo‘shildingiz!\n\n"
             f"🔗 <b>Ushbu havolani nusxalab, 3 ta do‘stingizga yuboring::</b>\n\n"
             f"🟦 <code>{referral_link}</code>\n\n"
-            f"👥 Ushbu linkni 3 ta do'stingizga yuboring va bepul marafonga ega bo'ling",
+            f"👥 3 ta do'stingiz ushbu havola orqali taqdim etiladigan kanalga obuna bolishsin va marafonga ega bo'ling",
             parse_mode="HTML",
             reply_markup=keyboard
         )
