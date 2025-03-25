@@ -160,9 +160,9 @@ async def check_subscription(callback: CallbackQuery):
 
         await callback.message.answer(
             f"🎉 Siz kanalga muvaffaqiyatli qo‘shildingiz!\n\n"
-            f"🔗 <b>Bu sizning referal linkingiz:</b>\n\n"
+            f"🔗 <b>Ushbu havolani nusxalab, 3 ta do‘stingizga yuboring::</b>\n\n"
             f"🟦 <code>{referral_link}</code>\n\n"
-            f"👥 3 ta do‘stingizni taklif qilib, bepul marafonga ega bo‘ling!",
+            f"👥  3 ta do‘stingizni taklif qiling va bepul marafonga ega bo‘ling!",
             parse_mode="HTML",
             reply_markup=keyboard
         )
